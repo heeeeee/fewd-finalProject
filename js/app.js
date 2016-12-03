@@ -1,11 +1,17 @@
-//
-// app.js
-// connects to Google Maps API to get location infomration
-//
+/*/////////////////////////////////////////////////////////
+ * app.js
+ * connects to Google Maps API to get location infomration
+ *
+ * December 2016
+ * 
+ */////////////////////////////////////////////////////////
 
 
-// The API can't be loaded after the document has finished loading by default, 
-// need to load it asynchronous.
+/*
+ * Initializing Google Map API
+ * The API can't be loaded after the document has finished loading by default
+ * need to load it asynchronous
+ */ 
 function initMap() {
 
   // get all of the post title (locations) and store it in locationList
@@ -19,7 +25,7 @@ function initMap() {
     var parkPosition = getLocationCoordinate(locationNameList[i]);
     locations.push([parkPosition.address,parkPosition.lat,parkPosition.lng]);
   }
-  console.log(locations);
+  //console.log(locations);
 
   // center the map
   var map = new google.maps.Map($('#map').get(0), {
@@ -27,13 +33,14 @@ function initMap() {
     center: {lat: 37.7749295, lng: -122.4194155}
   });
 
-
+  // place the markers based on the information stored in locations
   var infowindow = new google.maps.InfoWindow();
   var marker, i;
   for (i = 0; i < locations.length; i++) {  
     marker = new google.maps.Marker({
       position: new google.maps.LatLng(locations[i][1], locations[i][2]),
-      map: map
+      map: map,
+      icon: normalIcon
     });
     google.maps.event.addListener(marker, 'click', (function(marker, i) {
       return function() {
@@ -43,13 +50,34 @@ function initMap() {
     })(marker, i));
   }
 
+  // on clicking submit place a marker on the map
   var geocoder = new google.maps.Geocoder();
   $('#submit').on("click", function(){
     geocodeAddress(geocoder, map);
   });
+
+//   $('#markers_info .marker').hover(
+//       // mouse in
+//       function () {
+//         // first we need to know which <div class="marker"></div> we hovered
+//         var index = $('#markers_info .marker').index(this);
+//         markers[index].setIcon(highlightedIcon());
+//       },
+//       // mouse out
+//       function () {
+//         // first we need to know which <div class="marker"></div> we hovered
+//         var index = $('#markers_info .marker').index(this);
+//         markers[index].setIcon(normalIcon());
+//       }
+
+//       );
+// });
 }
 
-// extract the innerText from headers
+/* 
+ * extracts the innerText from headers
+ * @param {Object} headers 
+ */
 function extract(headers) {
   var a = [];
   for ( var i = 0; i < headers.length; i++ ) {
@@ -59,7 +87,10 @@ function extract(headers) {
   return a;
 }
 
-// get location coordinates based on address passed
+/* 
+ * get location coordinates based on address passed
+ * @param {String} address 
+ */
 function getLocationCoordinate(address) {
   var position = {};
   $.ajax({
@@ -84,7 +115,11 @@ function getLocationCoordinate(address) {
   return position;
 }
 
-
+/* 
+ * returns position based on address passed
+ * @param {Object} geocoder
+ * @pamar {Object} resultMap 
+ */
 function geocodeAddress(geocoder, resultsMap) {
   var address = $('#address').val();
   geocoder.geocode({'address': address}, function(results, status) {
@@ -100,7 +135,19 @@ function geocodeAddress(geocoder, resultsMap) {
   });
 }
 
+// functions that return icons.  Make or find your own markers.
+function normalIcon() {
+  return {
+    url: 'http://1.bp.blogspot.com/_GZzKwf6g1o8/S6xwK6CSghI/AAAAAAAAA98/_iA3r4Ehclk/s1600/marker-green.png'
+  };
+}
+function highlightedIcon() {
+  return {
+    url: 'http://steeplemedia.com/images/markers/markerGreen.png'
+  };
+}
 
+// non google map related
 $(document).ready(function(){
 
   // show overlay box 
@@ -128,23 +175,11 @@ $(document).ready(function(){
      $("#overlay-box6").show("slow", function() {
      });
    });
+
    // hide overlay box
    $(".post").mouseleave(function(){
      $(".overlay-box").hide("slow", function() {
      });
    });
 
-  // GET news source from news api
-  $.ajax({
-     type: "GET",
-     url: "https://newsapi.org/v1/articles?source=national-geographic&sortBy=top&apiKey=1eff36b4414c4786abb39ecd8ad16f4c",
-     success: function(news) {
-        $("#contenthere").load(news);
-        console.log(news);
-  },
-  error: function() {
-    alert("Error getting news");
-  }
 });
-
-  });
